@@ -63,7 +63,7 @@ function watch(remixRoot: string) {
 function generate(routesInfo: RoutesInfo) {
   const jsCode = generateHelpers(routesInfo);
   const tsCode = generateDefinition(routesInfo);
-  const outputPath = path.join(process.cwd(), 'node_modules', '.remix-routes');
+  const outputPath = path.join(process.cwd(), '..', '..', 'node_modules', '.remix-routes');
   if (!fs.existsSync(outputPath)) {
     fs.mkdirSync(outputPath);
   }
