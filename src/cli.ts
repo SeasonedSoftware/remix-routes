@@ -14,6 +14,20 @@ Options
 --watch, -w  Watch for routes changes
 `;
 
+async function getAppPath() {
+  const { dirname } = require('path');
+  const { constants, promises: { access } } = require('fs');
+
+  for (let path of module.paths) {
+    try {
+      await access(path, constants.F_OK);
+      return dirname(path);
+    } catch (e) {
+      // Just move on to next path
+    }
+  }
+}
+
 const cli = meow(helpText, {
   flags: {
     watch: {
@@ -49,7 +63,7 @@ async function buildHelpers(remixRoot: string): Promise<RoutesInfo> {
 
 export async function build(remixRoot: string) {
   const routesInfo = await buildHelpers(remixRoot);
-  generate(routesInfo);
+  await generate(routesInfo);
 }
 
 function watch(remixRoot: string) {
@@ -60,10 +74,11 @@ function watch(remixRoot: string) {
   console.log('Watching for routes changes...');
 }
 
-function generate(routesInfo: RoutesInfo) {
+async function generate(routesInfo: RoutesInfo) {
   const jsCode = generateHelpers(routesInfo);
   const tsCode = generateDefinition(routesInfo);
-  const outputPath = path.join(process.cwd(), 'node_modules', '.remix-routes');
+  const appPath = await getAppPath()
+  const outputPath = path.join(appPath, 'node_modules', '.remix-routes');
   if (!fs.existsSync(outputPath)) {
     fs.mkdirSync(outputPath);
   }
